@@ -568,6 +568,12 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <div class="share-buttons">
+          <span class="share-label">Share:</span>
+          <button class="share-button share-twitter" data-activity="${name.replace(/"/g, '&quot;')}" data-description="${details.description.replace(/"/g, '&quot;')}" aria-label="Share on Twitter">𝕏</button>
+          <button class="share-button share-facebook" aria-label="Share on Facebook">f</button>
+          <button class="share-button share-copy" data-activity="${name.replace(/"/g, '&quot;')}" aria-label="Copy link">🔗</button>
+        </div>
       </div>
     `;
 
@@ -586,6 +592,48 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handlers for share buttons
+    const pageUrl = window.location.href;
+
+    activityCard.querySelector(".share-twitter").addEventListener("click", (e) => {
+      const activityName = e.currentTarget.dataset.activity;
+      const description = e.currentTarget.dataset.description;
+      const maxDescLength = 80;
+      const shortDesc = description.length > maxDescLength
+        ? description.slice(0, maxDescLength) + "…"
+        : description;
+      const text = `Check out "${activityName}" at Mergington High School! ${shortDesc}`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(pageUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    activityCard.querySelector(".share-facebook").addEventListener("click", () => {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    activityCard.querySelector(".share-copy").addEventListener("click", (e) => {
+      const activityName = e.currentTarget.dataset.activity;
+      const copyBtn = e.currentTarget;
+      if (!navigator.clipboard) {
+        showMessage("Clipboard access is not available. Please copy the page URL manually.", "error");
+        return;
+      }
+      navigator.clipboard.writeText(pageUrl).then(() => {
+        copyBtn.textContent = "✓";
+        setTimeout(() => { copyBtn.textContent = "🔗"; }, 2000);
+        showMessage(`Link to "${activityName}" copied to clipboard!`, "success");
+      }).catch(() => {
+        showMessage("Could not copy link. Please copy the page URL manually.", "error");
+      });
+    });
 
     activitiesList.appendChild(activityCard);
   }
